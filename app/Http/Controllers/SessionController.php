@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class RegisteredUserController extends Controller
+class SessionController extends Controller
 {
     public function create()
     {
-        return view('auth.register');
+        return view('auth.login');
     }
-    public function store(Request $request){
+
+    public function store(Request $request)
+    {
         dd($request->all());
     }
 }
