@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class SessionController extends Controller
+class AuthController extends Controller
 {
     public function create()
     {
@@ -26,9 +26,12 @@ class SessionController extends Controller
                 'email' => 'The provided credentials do not match our records.'
             ]);
         }
-        request()->session()->regenerate();
+        $user = $request->user();
 
-        return redirect('/jobs');
+        return response()->json([
+            'token' => $user->createToken('auth_token')->plainTextToken,
+            'user' => $user,
+        ]);
     }
 
     public function destroy()

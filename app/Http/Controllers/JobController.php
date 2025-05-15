@@ -2,70 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Http\Requests\v1\StoreJobRequest;
+use App\Http\Requests\v1\UpdateJobRequest;
+use App\Http\Resources\v1\JobCollection;
+use App\Http\Resources\v1\JobResource;
 use App\Models\Job;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class JobController extends Controller
 {
-    public function index()
+    public function index(): JobCollection
     {
         $jobs = Job::with('employer')->latest()->paginate(3);
-        return view('jobs.index', [
-            'jobs' => $jobs]);
+        return new JobCollection($jobs);
     }
 
-    public function create()
+    public function show(Job $job): JobResource
     {
-        return view('jobs.create');
-
+        return new JobResource($job);
     }
 
-    public function store()
+    public function store(StoreJobRequest $request): JsonResponse
     {
-        request()->validate([
-            'title' => ['required', 'min:3'],
-            'salary' => ['required', 'numeric'],
-        ]);
-        Job::create([
-            'title' => request('title'),
-            'salary' => request('salary'),
-            'employer_id' => 1,
-        ]);
-        return redirect('/jobs');
+        if (!request()->user()->isEmployer()) {
+            return response()->json([
+                'message' => 'This User is not Employer'
+            ], 422);
+        }
+        $job = Job::create($request->validateWithUser());
+        return response()->json([
+            'job' => new JobResource($job),
+            'massage' => 'Job created successfully',
+            'status' => true
+        ], 201);
 
     }
 
-    public function show(Job $job)
+    public function update(UpdateJobRequest $request, Job $job): JsonResponse
     {
-        return view('jobs.show', ['job' => $job]);
-
+        if ($job->employer->id !== request()->user()->id) {
+            return response()->json([
+                'message' => 'This User is not authorized to edit the job.'
+            ], 422);
+        }
+        $job->update($request->validateWithUser());
+        return response()->json([
+            'job' => new JobResource($job),
+            'massage' => 'Job created successfully',
+            'status' => true]);
     }
 
-    public function edit(Job $job)
-    {
-        return view('jobs.edit', ['job' => $job]);
-
-    }
-
-    public function update(Job $job)
-    {
-        request()->validate([
-            'title' => ['required', 'min:3'],
-            'salary' => ['required'],
-        ]);
-
-        $job->update([
-            'title' => request('title'),
-            'salary' => request('salary'),
-        ]);
-
-        return redirect(' / jobs / ' . $job->id);
-    }
-
-    public function destroy(Job $job)
+    public function destroy(Job $job): JsonResponse
     {
         $job->delete();
-        return redirect(' / jobs');
+        return response()->json([
+            'message' => 'Job deleted successfully',
+            'status' => true,
+        ]);
     }
 }
