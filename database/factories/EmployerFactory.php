@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Employer;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Employer>
+ * @extends Factory<Employer>
  */
 class EmployerFactory extends Factory
 {
@@ -18,6 +20,7 @@ class EmployerFactory extends Factory
     {
         return [
             'name' => $this->faker->company(),
+            'user_id' => User::factory()
         ];
     }
 }

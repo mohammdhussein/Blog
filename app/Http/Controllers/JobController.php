@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Job;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class JobController extends Controller
 {
@@ -45,7 +48,6 @@ class JobController extends Controller
     public function edit(Job $job)
     {
         return view('jobs.edit', ['job' => $job]);
-
     }
 
     public function update(Job $job)
