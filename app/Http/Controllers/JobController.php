@@ -3,45 +3,58 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\v1\JobCollection;
 use App\Models\Job;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 
 class JobController extends Controller
 {
-    public function index()
+    public function index(): JobCollection
     {
         $jobs = Job::with('employer')->latest()->paginate(3);
-        return view('jobs.index', [
-            'jobs' => $jobs]);
-    }
+        return new JobCollection($jobs);
 
-    public function create()
-    {
-        return view('jobs.create');
 
     }
 
-    public function store()
+    public function store(): JsonResponse
     {
-        request()->validate([
+        $validator = Validator::make(request()->all(), [
             'title' => ['required', 'min:3'],
             'salary' => ['required', 'numeric'],
         ]);
-        Job::create([
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+                'status' => false,
+                'massage' => 'Validation failed'
+            ], 422);
+        }
+        $job = Job::create([
             'title' => request('title'),
             'salary' => request('salary'),
-            'employer_id' => 1,
+            'employer_id' => request()->user()->id,
         ]);
-        return redirect('/jobs');
+        return response()->json([
+            'job' => $job,
+            'massage' => 'Job created successfully',
+            'status' => true
+        ], 201);
 
     }
 
     public function show(Job $job)
     {
-        return view('jobs.show', ['job' => $job]);
+        return response()->json([
+            'job' => $job,
+            'massage' => 'Job Found Successfully'
+        ]);
 
     }
 
@@ -52,16 +65,28 @@ class JobController extends Controller
 
     public function update(Job $job)
     {
-        request()->validate([
+        $validator = Validator::make(request()->all(), [
             'title' => ['required', 'min:3'],
-            'salary' => ['required'],
+            'salary' => ['required', 'numeric'],
         ]);
 
-        $job->update([
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+                'status' => false,
+                'massage' => 'Validation failed'
+            ], 422);
+        }
+        $job = Job::create([
             'title' => request('title'),
             'salary' => request('salary'),
+            'employer_id' => request()->user()->id,
         ]);
-
+        return response()->json([
+            'job' => $job,
+            'massage' => 'Job created successfully',
+            'status' => true
+        ], 201);
         return redirect(' / jobs / ' . $job->id);
     }
 
