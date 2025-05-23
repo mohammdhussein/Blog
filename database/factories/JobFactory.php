@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Employer;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +20,7 @@ class JobFactory extends Factory
     {
         return [
             'title' => $this->faker->jobTitle(),
-            'employer_id' => Employer::factory(),
+            'employer_id' => User::factory(),
             'salary' => $this->faker->numberBetween($min = 1000, $max = 9000),
         ];
     }
