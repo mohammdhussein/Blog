@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\v1;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -34,10 +33,13 @@ class AuthController extends Controller
         ]);
     }
 
-    public function destroy()
+    public function destroy(Request $request)
     {
-        Auth::logout();
+        $request->user()->currentAccessToken()->delete();
 
-        return redirect('/');
+        return response()->json([
+            'message' => 'Logged out successfully',
+            'status' => true,
+        ]);
     }
 }
