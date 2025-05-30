@@ -16,9 +16,13 @@ class JobResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'employer_id' => $this->employer->id,
             'title' => $this->title,
             'salary' => $this->salary,
+            'employer_id' => $this->employer_id,
+            'numberOfApplicants' => $this->when(isset($this->applicants_count), $this->applicants_count),
+
+            'applicants' => ApplicantResource::collection($this->whenLoaded('applicants')),
+            //'applications' => ApplicationResource::collection($this->whenLoaded('applications'))
 
         ];
     }
